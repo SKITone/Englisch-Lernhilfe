@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -120,9 +120,9 @@
 <header>
   <h2>📘 Medienenglisch</h2>
   <div class="nav">
-    <a class="btn" href="#home">🏠 Kapitel</a>
-    <a class="btn" href="#exam">🎓 Prüfungssimulation</a>
-    <button class="btn ghost" id="resetBtn">↺ Fortschritt zurücksetzen</button>
+    <a class="btn" href="#home">🏠 Chapters</a>
+    <a class="btn" href="#exam">🎓 Exam Simulation</a>
+    <button class="btn ghost" id="resetBtn">↺ Reset progress</button>
   </div>
 </header>
 <main id="app"></main>
@@ -167,16 +167,16 @@ function renderHome(){
       </div></a>`;
   }).join('');
   app().innerHTML = `<h1>Medienenglisch</h1>
-    <p class="sub">Alle ${CHAPTERS.length} Kapitel durcharbeiten — Summary, Vokabeln, Übung.</p>
+    <p class="sub">Work through all ${CHAPTERS.length} chapters — summary, vocabulary, practice.</p>
     <div class="tiles">${tiles}</div>`;
 }
 
 function renderChapter(id, tab='summary'){
   const c = CHAPTERS.find(x=>x.id===id);
   if(!c){ location.hash='home'; return; }
-  const tabs = [['summary','Summary'],['vocab','Vocabulary'],['practice','Übung']]
+  const tabs = [['summary','Summary'],['vocab','Vocabulary'],['practice','Practice']]
     .map(([k,l])=>`<button class="tab ${k===tab?'on':''}" data-tab="${k}">${l}</button>`).join('');
-  app().innerHTML = `<a class="back" href="#home">← Kapitel</a>
+  app().innerHTML = `<a class="back" href="#home">← Chapters</a>
     <h1>${c.id}. ${c.topic}</h1><p class="sub">${c.hook}</p>
     <div class="tabbar">${tabs}</div><div id="tabc"></div>`;
   app().querySelectorAll('.tab').forEach(b=> b.onclick=()=>renderChapter(id, b.dataset.tab));
@@ -188,10 +188,10 @@ function renderChapter(id, tab='summary'){
 
 function renderSummary(host, c){
   const sections = c.summary.map(s=>
-    `<div class="card"><h3>${s.h}</h3><p>${s.de}</p>
-     <details class="en-detail"><summary>Auf Englisch</summary><p>${s.en}</p></details></div>`).join('');
+    `<div class="card"><h3>${s.h}</h3><p>${s.en}</p>
+     <details class="en-detail"><summary>Auf Deutsch</summary><p>${s.de}</p></details></div>`).join('');
   const facts = (c.details||[]).map(d=>`<li>${d}</li>`).join('');
-  const factbox = facts ? `<div class="card factbox"><h3>📌 Details &amp; Fakten</h3><ul class="facts">${facts}</ul></div>` : '';
+  const factbox = facts ? `<div class="card factbox"><h3>📌 Details &amp; Facts</h3><ul class="facts">${facts}</ul></div>` : '';
   host.innerHTML = sections + factbox;
 }
 
@@ -200,12 +200,12 @@ function renderVocab(host, c){
     `<tr><td class="en">${v.en}</td><td class="de">${v.de}</td>
      <td class="note">${v.note||''}</td></tr>`).join('');
   host.innerHTML = `<div class="card"><div class="vocab-wrap"><table class="vocab">
-    <thead><tr><th>English</th><th>Deutsch</th><th></th></tr></thead>
+    <thead><tr><th>English</th><th>German</th><th></th></tr></thead>
     <tbody>${rows}</tbody></table></div></div>`;
 }
 
 function renderPractice(host, c, opts={}){
-  const modes = [['mc','Multiple-Choice'],['recall','Free-Recall'],['coach','🤖 KI-Coach']];
+  const modes = [['mc','Multiple-Choice'],['recall','Free-Recall'],['coach','🤖 AI Coach']];
   host.innerHTML = `<div class="modes">${modes.map(([k,l])=>
     `<button class="mode" data-m="${k}">${l}</button>`).join('')}</div><div id="modec"></div>`;
   const mc = document.getElementById('modec');
@@ -223,11 +223,11 @@ function shuffle(a){ const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Ma
 function runMC(host, c){
   let i=0; const items=c.mc;
   function draw(){
-    if(i>=items.length){ host.innerHTML=`<div class="done">✅ Durch! ${items.length} Fragen.</div>`; return; }
+    if(i>=items.length){ host.innerHTML=`<div class="done">✅ Done! ${items.length} questions.</div>`; return; }
     const m=items[i]; const order=shuffle(m.options.map((_,k)=>k)); const rightPos=order.indexOf(m.correct);
-    host.innerHTML=`<div class="card"><div class="meta">Frage ${i+1}/${items.length}</div>
+    host.innerHTML=`<div class="card"><div class="meta">Question ${i+1}/${items.length}</div>
       <div class="q">${m.q}</div><div id="opts"></div><div class="fb" id="fb"></div>
-      <button class="btn next" id="nx" style="display:none">Weiter →</button></div>`;
+      <button class="btn next" id="nx" style="display:none">Next →</button></div>`;
     const opts=host.querySelector('#opts');
     order.forEach((orig,pos)=>{ const b=el(`<button class="opt">${m.options[orig]}</button>`);
       b.onclick=()=>answer(pos,rightPos,m); opts.appendChild(b); });
@@ -236,7 +236,7 @@ function runMC(host, c){
     const os=[...host.querySelectorAll('.opt')]; os.forEach(o=>o.disabled=true);
     os[right].classList.add('correct'); const ok=pos===right; if(!ok) os[pos].classList.add('wrong');
     store.mark(c.id, 'mc:'+i, ok);
-    host.querySelector('#fb').innerHTML=(ok?'✅ Richtig. ':'❌ Nein. ')+`<span class="why">${m.why}</span>`;
+    host.querySelector('#fb').innerHTML=(ok?'✅ Correct. ':'❌ Nope. ')+`<span class="why">${m.why}</span>`;
     const nx=host.querySelector('#nx'); nx.style.display='inline-block'; nx.onclick=()=>{i++;draw();};
   }
   draw();
@@ -245,16 +245,16 @@ function runMC(host, c){
 function runRecall(host, c){
   let i=0; const items=c.recall;
   function draw(){
-    if(i>=items.length){ host.innerHTML=`<div class="done">✅ Durch! ${items.length} Fragen.</div>`; return; }
+    if(i>=items.length){ host.innerHTML=`<div class="done">✅ Done! ${items.length} questions.</div>`; return; }
     const r=items[i];
-    host.innerHTML=`<div class="card"><div class="meta">Karte ${i+1}/${items.length}</div>
+    host.innerHTML=`<div class="card"><div class="meta">Card ${i+1}/${items.length}</div>
       <div class="q">${r.q}</div>
-      <button class="btn" id="rev">Antwort zeigen</button>
+      <button class="btn" id="rev">Show answer</button>
       <div id="ans" style="display:none">
         <div class="answer">${r.answer}</div>
-        ${r.useVocab?.length?`<div class="usev">Vokabeln: ${r.useVocab.map(v=>`<span class="pill">${v}</span>`).join(' ')}</div>`:''}
-        <div class="selfrate"><button class="btn good" data-k="1">Saß ✓</button>
-          <button class="btn ghost" data-k="0">Nochmal ↻</button></div></div></div>`;
+        ${r.useVocab?.length?`<div class="usev">Vocabulary: ${r.useVocab.map(v=>`<span class="pill">${v}</span>`).join(' ')}</div>`:''}
+        <div class="selfrate"><button class="btn good" data-k="1">Got it ✓</button>
+          <button class="btn ghost" data-k="0">Again ↻</button></div></div></div>`;
     document.getElementById('rev').onclick=()=>{ document.getElementById('ans').style.display='block'; };
     host.querySelectorAll('.selfrate .btn').forEach(b=> b.onclick=()=>{ store.mark(c.id, 'recall:'+i, b.dataset.k==='1'); i++; draw(); });
   }
@@ -283,21 +283,21 @@ Start now with your first question.`;
 }
 
 function copyText(str, btn){
-  const done=()=>{ const t=btn.textContent; btn.textContent='kopiert ✓'; setTimeout(()=>btn.textContent=t,1500); };
+  const done=()=>{ const t=btn.textContent; btn.textContent='copied ✓'; setTimeout(()=>btn.textContent=t,1500); };
   if(navigator.clipboard && location.protocol!=='file:'){ navigator.clipboard.writeText(str).then(done).catch(()=>fallback()); }
   else fallback();
   function fallback(){ const ta=el(`<textarea style="position:fixed;left:-9999px"></textarea>`);
     ta.value=str; document.body.appendChild(ta); ta.select();
-    try{ document.execCommand('copy'); done(); }catch(e){ alert('Kopieren nicht möglich — Text manuell markieren.'); }
+    try{ document.execCommand('copy'); done(); }catch(e){ alert('Copy failed — please select the text manually.'); }
     document.body.removeChild(ta); }
 }
 
 function runCoach(host, c){
   host.innerHTML=`<div class="card">
-    <p>Klick „Prompt kopieren", füge ihn in ein beliebiges LLM (ChatGPT, Claude …) ein.
-    Das LLM prüft dich dann auf Englisch zu diesem Kapitel — du tippst deine Antworten.</p>
-    <button class="btn good" id="cp">📋 Prompt kopieren</button>
-    <details style="margin-top:1rem"><summary>Prompt ansehen</summary>
+    <p>Click "Copy prompt" and paste it into any LLM (ChatGPT, Claude …).
+    The LLM will then examine you in English on this chapter — you type your answers.</p>
+    <button class="btn good" id="cp">📋 Copy prompt</button>
+    <details style="margin-top:1rem"><summary>View prompt</summary>
       <pre class="prompt" id="pv"></pre></details></div>`;
   const prompt=buildCoachPrompt(c);
   document.getElementById('pv').textContent=prompt;
@@ -307,18 +307,18 @@ function runCoach(host, c){
 function renderExam(){
   const tiles = CHAPTERS.map(c=>
     `<button class="extile" data-id="${c.id}">${c.id}. ${c.topic}</button>`).join('');
-  app().innerHTML=`<a class="back" href="#home">← Kapitel</a>
-    <h1>🎓 Prüfungssimulation</h1>
-    <p class="sub">Wie beim Prüfer: ein Kapitel prüfen, ohne vorher die Summary zu sehen. Würfle zufällig oder wähle selbst.</p>
+  app().innerHTML=`<a class="back" href="#home">← Chapters</a>
+    <h1>🎓 Exam Simulation</h1>
+    <p class="sub">Just like the examiner: get tested on a chapter without seeing the summary first. Roll at random or pick yourself.</p>
     <div class="card">
-      <button class="btn good rollbtn" id="roll">🎲 Zufälliges Kapitel prüfen</button>
-      <div class="exsep">oder Kapitel selbst wählen</div>
+      <button class="btn good rollbtn" id="roll">🎲 Test a random chapter</button>
+      <div class="exsep">or pick a chapter yourself</div>
       <div class="extiles">${tiles}</div>
       <div class="fb" id="rollfb"></div>
     </div>
     <div id="examstage"></div>`;
   function start(c){
-    document.getElementById('rollfb').innerHTML=`Gezogen: <b>Kapitel ${c.id} — ${c.topic}</b>. Antworte blind; die Summary siehst du erst danach auf der Kapitelseite.`;
+    document.getElementById('rollfb').innerHTML=`Drawn: <b>Chapter ${c.id} — ${c.topic}</b>. Answer blind; you'll only see the summary afterwards on the chapter page.`;
     renderPractice(document.getElementById('examstage'), c, {blind:true});
     document.getElementById('examstage').scrollIntoView({behavior:'smooth', block:'start'});
   }
@@ -327,7 +327,7 @@ function renderExam(){
 }
 
 document.getElementById('resetBtn').onclick=()=>{
-  if(confirm('Fortschritt wirklich zurücksetzen?')){ store.resetAll(); route(); }
+  if(confirm('Really reset your progress?')){ store.resetAll(); route(); }
 };
 
 route();
